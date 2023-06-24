@@ -98,7 +98,6 @@ class LivoxPointsPlugin : public RayPlugin {
     int64_t currStartIndex = 0;
     int64_t maxPointSize = 1000;
     int64_t downSample = 1;
-    int64_t timf_offset_step = 10000;
 
     double maxDist = 400.0;
     double minDist = 0.1;

@@ -14,6 +14,7 @@
 #include <gazebo/transport/Node.hh>
 #include "livox_laser_simulation/csv_reader.hpp"
 #include "livox_laser_simulation/livox_ode_multiray_shape.h"
+#include <chrono>
 
 namespace gazebo {
 
@@ -87,7 +88,6 @@ void LivoxPointsPlugin::Load(gazebo::sensors::SensorPtr _parent, sdf::ElementPtr
     if (downSample < 1) {
         downSample = 1;
     }
-    timf_offset_step = (int)1000000000 / samplesStep;
     ROS_INFO_STREAM("sample:" << samplesStep);
     ROS_INFO_STREAM("downsample:" << downSample);
     rayShape->RayShapes().reserve(samplesStep / downSample);
@@ -133,7 +133,7 @@ void LivoxPointsPlugin::OnNewLaserScans() {
         scan_point.header.frame_id = raySensor->Name();
         auto &scan_points = scan_point.points;
 
-        int offset_time_counter = 0;
+        std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
         for (auto &pair : points_pair) {
                 auto range = rayShape->GetRange(pair.first);
                 auto intensity = rayShape->GetRetro(pair.first);
@@ -153,10 +153,11 @@ void LivoxPointsPlugin::OnNewLaserScans() {
                 scan_points.back().x = point.X();
                 scan_points.back().y = point.Y();
                 scan_points.back().z = point.Z();
-                scan_points.back().reflectivity = range != 0 ? 50 : 0;
-                scan_points.back().tag = 16;
-                scan_points.back().offset_time = offset_time_counter*timf_offset_step;
-                offset_time_counter++;
+                scan_points.back().reflectivity = intensity;
+                scan_points.back().tag = 16; // TODO
+                std::chrono::high_resolution_clock::time_point end_time = std::chrono::high_resolution_clock::now();
+                int elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+                scan_points.back().offset_time = elapsed_time;
         }
         scan_point.point_num = scan_point.points.size();
         if (scanPub && scanPub->HasConnections()) scanPub->Publish(laserMsg);
