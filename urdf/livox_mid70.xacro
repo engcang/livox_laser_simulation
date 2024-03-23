@@ -55,7 +55,7 @@
           <visualize>${visualize}</visualize>
 		  <samples>${samples}</samples>
 		  <downsample>${downsample}</downsample>
-		  <csv_file_name>package://livox_laser_simulation/scan_mode/mid70.csv</csv_file_name>
+		  <csv_file_name>scan_mode/mid70.csv</csv_file_name>
 		  <ros_topic>${ros_topic}</ros_topic>
         </plugin>
       </sensor>
